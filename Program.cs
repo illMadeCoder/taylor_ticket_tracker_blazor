@@ -14,7 +14,11 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("POSTGRESQLCONNSTR_DefaultConnection")));
 
+builder.Services.AddSignalR();
+
 var app = builder.Build();
+
+app.MapHub<EventHub>("/hubs/event");
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

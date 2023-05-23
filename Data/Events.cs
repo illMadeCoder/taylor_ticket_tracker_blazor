@@ -12,15 +12,15 @@ public class Event
     public int Id { get; set; }
     [Column("price")]
     public int Price { get; set; }
-    // public string Url { get; set; }
-
-    // [Column("insertdatetime")]
-    // public DateTime InsertDateTime { get; set; }
-
-    // [Column("rowid")]
-    // public int RowId { get; set; }
-
-    // public string Img { get; set; }
-    // public string Section { get; set; }
+    [Column("url")]
+    public string Url { get; set; }   
+    [Column("insertdatetime")]
+    public DateTime InsertDateTime { get; set; }
+    [Column("rowid")]
+    public int RowId { get; set; }
+    [Column("img")]
+    public string Img { get; set; }
+    [Column("section")]
+    public string Section { get; set; }
 }
 

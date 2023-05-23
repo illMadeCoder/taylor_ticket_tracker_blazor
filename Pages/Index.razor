@@ -1,24 +1,44 @@
 ﻿@page "/"
-@using taylor_ticket_tracker_blazor.Data;
+@using taylor_ticket_tracker_blazor.Data
 @using Microsoft.EntityFrameworkCore
-@inject ApplicationDbContext DbContext
+@inject IServiceScopeFactory ScopeFactory
+
+<PageTitle>Taylor Ticket Tracker</PageTitle>
 
 <h3>Event Details</h3>
 
 @code {
     private IList<Event> eventDetails;
+    private System.Timers.Timer timer;
 
     protected override async Task OnInitializedAsync()
 {
     eventDetails = await GetEventsAsync();
+    timer = new System.Timers.Timer(1000); // set the interval to 1 second
+    timer.Elapsed += async (sender, args) => await RefreshEvents();
+    timer.Start();
 }
 
     private async Task<IList<Event>> GetEventsAsync()
 {
-    return await DbContext.Events
+    using var scope = ScopeFactory.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    return await dbContext.Events
     .OrderByDescending(e => e.Id)
     .Take(10)
     .ToListAsync();
+}
+
+    private async Task RefreshEvents()
+{
+    eventDetails = await GetEventsAsync();
+    InvokeAsync(StateHasChanged);
+}
+
+    public void Dispose()
+{
+    timer?.Stop();
+    timer?.Dispose();
 }
 }
 
@@ -28,41 +48,21 @@
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Price</th>
-                <!--      <th>URL</th>
-                     <th>InsertDateTime</th>
-                     <th>RowID</th>
-                     <th>Img</th>
-                     <th>Section</th> -->
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var eventItem in eventDetails)
-            {
-                <tr>
-                    <td>@eventItem.Id</td>
-                    <td>@eventItem.Price</td>
-		    <!-- 	 <td>@eventItem.Url</td>
-			 <td>@eventItem.InsertDateTime</td>
-			 <td>@eventItem.RowId</td>
-			 <td>@eventItem.Img</td>
-			 <td>@eventItem.Section</td> -->
-                </tr>
-		    }
-        </tbody>
-    </table>
+    <div class="card-container">
+        @foreach (var eventItem in eventDetails)
+        {
+            <a href="@eventItem.Url" target="_blank">
+		<div class="event-card" id="@("card-" + eventItem.Id)">
+                    <div class="event-image">
+                        <img src="@eventItem.Img" alt="Event Image">
+                    </div>
+                    <div class="event-details">
+                        <h4>@eventItem.Section | $@string.Format("{0:0}", eventItem.Price) | @eventItem.InsertDateTime.ToString("MMMM dd")</h4>
+                    </div>
+                </div>
+            </a>
+			}
+    </div>
 }
 
-
-<PageTitle>Index</PageTitle>
-
-<h1>Hello, world!</h1>
-
-Welcome to your new app.
-
-<SurveyPrompt Title="How is Blazor working for you?" />
-
+    
