@@ -1,4 +1,62 @@
 ﻿@page "/"
+@using taylor_ticket_tracker_blazor.Data;
+@using Microsoft.EntityFrameworkCore
+@inject ApplicationDbContext DbContext
+
+<h3>Event Details</h3>
+
+@code {
+    private IList<Event> eventDetails;
+
+    protected override async Task OnInitializedAsync()
+{
+    eventDetails = await GetEventsAsync();
+}
+
+    private async Task<IList<Event>> GetEventsAsync()
+{
+    return await DbContext.Events
+    .OrderByDescending(e => e.Id)
+    .Take(10)
+    .ToListAsync();
+}
+}
+
+@if (eventDetails == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Price</th>
+                <!--      <th>URL</th>
+                     <th>InsertDateTime</th>
+                     <th>RowID</th>
+                     <th>Img</th>
+                     <th>Section</th> -->
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var eventItem in eventDetails)
+            {
+                <tr>
+                    <td>@eventItem.Id</td>
+                    <td>@eventItem.Price</td>
+		    <!-- 	 <td>@eventItem.Url</td>
+			 <td>@eventItem.InsertDateTime</td>
+			 <td>@eventItem.RowId</td>
+			 <td>@eventItem.Img</td>
+			 <td>@eventItem.Section</td> -->
+                </tr>
+		    }
+        </tbody>
+    </table>
+}
+
 
 <PageTitle>Index</PageTitle>
 
@@ -7,3 +65,4 @@
 Welcome to your new app.
 
 <SurveyPrompt Title="How is Blazor working for you?" />
+
